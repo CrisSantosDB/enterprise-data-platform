@@ -1,0 +1,142 @@
+
+# ==========================================
+# CREDENCIAIS E VARIÁVEIS DE AMBIENTE
+# ==========================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+service-account*.json
+credentials*.json
+secrets/
+secrets.*
+credentials/
+
+# Arquivos de credenciais do Google Cloud
+application_default_credentials.json
+gcloud-credentials.json
+
+# ==========================================
+# PYTHON
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.python-version.local
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Pacotes e builds
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+
+# Cache e testes
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# ==========================================
+# UV / GERENCIAMENTO DE DEPENDÊNCIAS
+# ==========================================
+# NÃO ignorar uv.lock: ele deve ser versionado.
+# NÃO ignorar pyproject.toml: ele define as dependências.
+
+# ==========================================
+# NOTEBOOKS
+# ==========================================
+.ipynb_checkpoints/
+
+# ==========================================
+# LOGS E ARQUIVOS TEMPORÁRIOS
+# ==========================================
+logs/
+*.log
+*.log.*
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# ==========================================
+# APACHE SPARK
+# ==========================================
+spark-warehouse/
+metastore_db/
+derby.log/
+checkpoints/
+artifacts/
+
+# ==========================================
+# DBT
+# ==========================================
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml
+
+# Se o projeto dbt estiver em outro diretório,
+# ajuste os caminhos conforme a estrutura real.
+
+# ==========================================
+# IDEs E EDITORES
+# ==========================================
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# ARQUIVOS DE DADOS LOCAIS
+# ==========================================
+data/raw/
+data/processed/
+data/interim/
+*.parquet
+*.avro
+*.orc
+*.sqlite
+*.sqlite3
+*.db
+
+# ==========================================
+# INFRAESTRUTURA / TERRAFORM
+# ==========================================
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ==========================================
+# RELATÓRIOS E EXPORTAÇÕES LOCAIS
+# ==========================================
+reports/local/
+exports/
