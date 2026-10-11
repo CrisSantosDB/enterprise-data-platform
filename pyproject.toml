@@ -1,0 +1,23 @@
+[project]
+name = "enterprise-data-platform"
+version = "0.1.0"
+description = "Plataforma de Engenharia de Dados de baixo custo para pequenas e médias empresas"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "delta-spark>=4.4.1",
+    "dotenv>=0.9.9",
+    "google-cloud-bigquery>=3.46.1",
+    "ipykernel>=7.3.0",
+    "pyspark==4.1.3",
+]
+
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+    "flake8>=7.4.1",
+    "isort>=9.0.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "sqlfluff>=4.4.0",
+]

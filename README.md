@@ -99,6 +99,50 @@ Principais indicadores:
 - **dbt:** transformação, modelagem e testes automatizados de dados.
 - **GitHub Actions:** automação de tarefas, testes e pipelines de CI/CD.
 
+## Configuração do ambiente Python com uv
+
+O projeto utiliza **Python 3.12.13** e **uv** para gerenciar o ambiente virtual e as dependências.
+
+### Pré-requisitos
+
+- Python 3.12
+- [uv](https://docs.astral.sh/uv/)
+
+### Instalação
+
+Após clonar o repositório, acesse a pasta do projeto e execute:
+
+```bash
+uv sync
+```
+
+Esse comando cria ou atualiza o ambiente virtual e instala as dependências definidas no projeto, utilizando o arquivo `uv.lock` quando disponível.
+
+Para ativar o ambiente virtual no Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Para verificar a versão do Python:
+
+```bash
+uv run python --version
+```
+
+### Gerenciamento de dependências
+
+As dependências principais incluem PySpark, Delta Lake, BigQuery e IPython Kernel. As ferramentas de desenvolvimento e testes incluem Black, Flake8, isort, pytest, pytest-cov e SQLFluff.
+
+As dependências são declaradas no `pyproject.toml` e suas versões resolvidas são registradas no `uv.lock`.
+
+### Arquivos de configuração
+
+- `pyproject.toml`: contém as informações do projeto e as dependências.
+- `uv.lock`: registra as versões resolvidas das dependências para ajudar a reproduzir o ambiente.
+- `.python-version`: indica a versão do Python utilizada pelo projeto.
+
+
 ## Ambientes
 
 A plataforma será organizada em dois ambientes:
