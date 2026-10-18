@@ -36,3 +36,28 @@ def test_carrega_variaveis_de_ambiente(monkeypatch):
     assert config.DB_USER == "usuario_teste"
     assert config.DB_PASSWORD == "senha_teste"
     assert str(config.DB_PORT) == "5432"
+
+
+def test_config_ambiente_dev():
+    from src.config import obter_config_ambiente
+
+    config = obter_config_ambiente("dev")
+
+    assert config["GCP_PROJECT"] == "novadrive-analytics-dev"
+    assert config["BQ_DATASET"] == "RAW"
+
+
+def test_config_ambiente_prod():
+    from src.config import obter_config_ambiente
+
+    config = obter_config_ambiente("prod")
+
+    assert config["GCP_PROJECT"] == "novadrive-analytics-prod"
+    assert config["BQ_DATASET"] == "RAW"
+
+
+def test_erro_para_ambiente_invalido():
+    from src.config import obter_config_ambiente
+
+    with pytest.raises(ValueError, match="Ambiente inválido"):
+        obter_config_ambiente("teste")
