@@ -1,0 +1,80 @@
+name: CI - Enterprise Data Platform.
+
+on: 
+  push:
+    branches:
+      - main 
+      - feature/*
+  pull_request:
+    branches: 
+      - main 
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  lint:
+    name: Lint and Code Quality 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code 
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "**/uv.lock"
+
+      - name: Set up Python 
+        uses: actions/setup-python@v5 
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: | 
+          uv sync --all-extras --dev 
+      
+      - name: Run black (code formatting)
+        run: uv run  black --check --diff . 
+      
+      - name: Run isort (Import Sorting)
+        run: uv run isort --profile black --check-only --diff src/ tests/
+
+      - name: Run Flake8 (linting)
+        run: uv run flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics 
+
+      #- name: Run SQLFluff (SQL Linting)
+      #  run: uv run sqlfluff lint models/
+
+  tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps: 
+      - name: Checkout code 
+        uses: actions/checkout@v4
+      
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5 
+        with:
+          enable-cache: true 
+          cache-dependency-glob: "**/uv.lock"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5 
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies 
+        run: |
+          uv sync --dev
+
+      - name: Run tests with pytest
+        run: |
+          uv run pytest  tests/ --verbose --tb=short 
+      
+      
+   
