@@ -1,4 +1,3 @@
-
 import argparse
 import logging
 import os
@@ -73,9 +72,8 @@ DB_TABLES = [
 
 # Funções necessárias
 
-def obter_data_max_bigquery(
-    bq_client: bigquery.Client, table: str
-) -> datetime:
+
+def obter_data_max_bigquery(bq_client: bigquery.Client, table: str) -> datetime:
     query = f"""
                 SELECT MAX(data_inclusao) AS data_max
                 FROM `{dataset_id}.{table}`
@@ -120,7 +118,7 @@ def buscar_registros_novos(
     return dados_novos
 
 
-def gravar_dados(table: str, project_id: str,dados_novos: DataFrame):
+def gravar_dados(table: str, project_id: str, dados_novos: DataFrame):
     (
         dados_novos.write.format("bigquery")
         .mode("overwrite")
@@ -132,26 +130,17 @@ def gravar_dados(table: str, project_id: str,dados_novos: DataFrame):
 
 
 def processar_tabela(
-    spark: SparkSession,
-    bq_client: bigquery.Client,
-    table: str,
-    project_id: str
+    spark: SparkSession, bq_client: bigquery.Client, table: str, project_id: str
 ):
     data_max_bq = obter_data_max_bigquery(bq_client, table)
 
-    dados_novos = buscar_registros_novos(
-        spark, table, data_max_bq
-    )
+    dados_novos = buscar_registros_novos(spark, table, data_max_bq)
 
     if dados_novos.limit(1).count() > 0:
         gravar_dados(table, project_id, dados_novos)
-        logger.info(
-            "Dados carregados na RAW para a tabela %s", table
-        )
+        logger.info("Dados carregados na RAW para a tabela %s", table)
     else:
-        logger.info(
-            "Nenhum registro encontrado para a tabela %s", table
-        )
+        logger.info("Nenhum registro encontrado para a tabela %s", table)
 
 
 # EXECUÇÃO PRINCIPAL
@@ -172,22 +161,18 @@ def main():
     config = obter_config_ambiente(args.ambiente)
 
     global dataset_id
-    dataset_id = (
-        f"{config['GCP_PROJECT']}.{config['BQ_DATASET']}"
+    dataset_id = f"{config['GCP_PROJECT']}.{config['BQ_DATASET']}"
+
+    logger.info(
+        "=== Iniciando pipeline de ingestão no ambiente: [%s] ===",
+        args.ambiente.upper(),
     )
 
-    logger.info("=== Iniciando pipeline de ingestão no ambiente: [%s] ===", args.ambiente.upper())
-    
-    spark, bq_client = inicializar_recursos(
-        config["GCP_PROJECT"]
-    )
+    spark, bq_client = inicializar_recursos(config["GCP_PROJECT"])
 
     try:
         # Lista as tabelas que já existem no RAW
-        list_tables_dataset = [
-            i.table_id
-            for i in bq_client.list_tables(dataset_id)
-        ]
+        list_tables_dataset = [i.table_id for i in bq_client.list_tables(dataset_id)]
 
         for table in DB_TABLES:
             if table not in list_tables_dataset:
@@ -210,16 +195,15 @@ def main():
                     .save()
                 )
 
-                logger.info(
-                    "Tabela %s carregada com sucesso", table
-                )
+                logger.info("Tabela %s carregada com sucesso", table)
 
             else:
-                processar_tabela(
-                    spark, bq_client, table, config["GCP_PROJECT"]
-               )
+                processar_tabela(spark, bq_client, table, config["GCP_PROJECT"])
 
-        logger.info("=== Pipiline concluído com sucesso no ambiente: [%s] ===", args.ambiente.upper())
+        logger.info(
+            "=== Pipiline concluído com sucesso no ambiente: [%s] ===",
+            args.ambiente.upper(),
+        )
 
     finally:
         spark.stop()

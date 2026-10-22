@@ -1,12 +1,11 @@
-from datetime import datetime 
-from unittest.mock import MagicMock
 from datetime import datetime
+from unittest.mock import MagicMock
 
-from src.ingestao import buscar_registros_novos 
+from src.ingestao import buscar_registros_novos
 
 
 def test_buscar_tabelas_e_data_mesmo_timestamp():
-     tabelas = [
+    tabelas = [
         "cidades",
         "clientes",
         "concessionarias",
@@ -16,46 +15,45 @@ def test_buscar_tabelas_e_data_mesmo_timestamp():
         "vendedores",
     ]
 
-     data_teste = datetime(2026, 10, 20, 10, 0, 0)
+    data_teste = datetime(2026, 10, 20, 10, 0, 0)
 
-     for tabela in tabelas:
+    for tabela in tabelas:
 
-          spark = MagicMock()
+        spark = MagicMock()
 
-          spark.read.format.return_value.option.return_value = spark.read.format.return_value
+        spark.read.format.return_value.option.return_value = (
+            spark.read.format.return_value
+        )
 
-          buscar_registros_novos(spark,tabela,data_teste)
+        buscar_registros_novos(spark, tabela, data_teste)
 
-          chamadas = spark.read.format.return_value.option.call_args_list 
+        chamadas = spark.read.format.return_value.option.call_args_list
 
-          sql_gerado = ""
+        sql_gerado = ""
 
-          for chamada in chamadas:
-               if chamada.args[0] == "dbtable":
-                    sql_gerado = chamada.args[1]
+        for chamada in chamadas:
+            if chamada.args[0] == "dbtable":
+                sql_gerado = chamada.args[1]
 
-          assert f"public.{tabela}" in sql_gerado
-          assert "data_inclusao >=" in sql_gerado
-     
-     
+        assert f"public.{tabela}" in sql_gerado
+        assert "data_inclusao >=" in sql_gerado
 
 
 def test_bucar_registro_novos_sem_watermark():
-     """Valida cenário de carga full quando não há data_max."""
-     spark = MagicMock()
+    """Valida cenário de carga full quando não há data_max."""
+    spark = MagicMock()
 
-     spark.read.format.return_value.option.return_value = spark.read.format.return_value 
+    spark.read.format.return_value.option.return_value = spark.read.format.return_value
 
-     buscar_registros_novos(spark,"vendas",None)
-     camada_options = spark.read.format.return_value.option.call_args_list
+    buscar_registros_novos(spark, "vendas", None)
+    camada_options = spark.read.format.return_value.option.call_args_list
 
-     sql_gerado = ""
+    sql_gerado = ""
 
-     for chamada in camada_options:
-       if chamada.args[0] == "dbtable":
+    for chamada in camada_options:
+        if chamada.args[0] == "dbtable":
             sql_gerado = chamada.args[1]
-     print(sql_gerado)
+    print(sql_gerado)
 
-     assert "public.vendas" in sql_gerado 
-     assert "data_inclusao >=" not in sql_gerado 
-    
+    assert "public.vendas" in sql_gerado
+    assert "data_inclusao >=" not in sql_gerado
