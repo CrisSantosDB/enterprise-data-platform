@@ -76,5 +76,13 @@ jobs:
         run: |
           uv run pytest  tests/ --verbose --tb=short 
       
-      
+      - name: Run tests with pytest
+        env:
+          DB_HOST: "localhost"
+          DB_PORT: "5432"
+          DB_NAME: "dummy_db"
+          DB_USER: "dummy_user"
+          DB_PASSWORD: "dummy_password"
+        run: |
+          uv run pytest tests/ --verbose --tb=short
    
