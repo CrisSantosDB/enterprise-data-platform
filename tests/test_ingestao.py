@@ -1,5 +1,13 @@
+import os
 from datetime import datetime
 from unittest.mock import MagicMock
+
+# Define valores fictícios antes que src/config.py seja chamado
+os.environ["DB_HOST"] = "localhost"
+os.environ["DB_PORT"] = "5432"
+os.environ["DB_NAME"] = "dummy_db"
+os.environ["DB_USER"] = "dummy_user"
+os.environ["DB_PASSWORD"] = "dummy_password"
 
 from src.ingestao import buscar_registros_novos
 
@@ -53,7 +61,6 @@ def test_bucar_registro_novos_sem_watermark():
     for chamada in camada_options:
         if chamada.args[0] == "dbtable":
             sql_gerado = chamada.args[1]
-    print(sql_gerado)
 
     assert "public.vendas" in sql_gerado
     assert "data_inclusao >=" not in sql_gerado
