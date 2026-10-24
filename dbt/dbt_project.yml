@@ -1,0 +1,67 @@
+name: 'enterprise_data_platform'
+version: '1.0.0'
+config-version: 2
+
+
+profile: 'default'
+
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"  
+clean-targets:        
+  - "target"
+  - "dbt_packages"
+
+
+vars:
+  incremental_safety_window_minutes: 5
+
+  percentual_desconto_min: 0.0
+  percentual_desconto_max: 0.10
+
+  reconciliacao_tolerancia: 0.01
+
+models:
+  enterprise_data_platform:
+    1_bronze:
+      +schema: 01_dbt_bronze
+      +materialized: incremental
+      +incremental_strategy: merge
+      +tags: ["bronze"]
+    
+    2_silver:
+      +schema: 02_dbt_silver
+      +materialized: incremental
+      +incremental_strategy: merge
+      +tags: ["silver"]
+
+    3_gold:
+      +schema: 03_dbt_gold
+      dimensions:
+        +materialized: table
+        +tags: ["gold", "dimensions"]
+
+      facts:
+        +materialized: incremental
+        +incremental_strategy: merge
+        +tags: ["gold","facts"]
+      
+      marts:
+        +materialized: table
+        +tags: ["gold","marts"]
+      
+      audits:
+        +materialized: view
+        +tags: ["gold","audits"]
+
+seeds:
+  enterprise_data_platform:
+    +schema: seeds 
+    reference:
+      +tags: ["reference"]
