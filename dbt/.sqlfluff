@@ -1,0 +1,29 @@
+[sqlfluff]
+dialect = bigquery
+templater = jinja
+max_line_length = 100
+indent_unit = space
+tab_space_size = 4
+
+[sqlfluff:indentation]
+indented_joins = false
+indented_using_on = true
+template_blocks_indent = false
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.identifiers]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = upper
+
+[sqlfluff:templater:jinja:macros]
+dbt_ref = "{% macro ref(model, v=None) %}dummy_table{% endmacro %}"
+dbt_source = "{% macro source(source_name, table_name) %}dummy_source{% endmacro %}"
+dbt_config = "{% macro config(materialized=None, unique_key=None, on_schema_change=None, partition_by=None, cluster_by=None, tags=None, schema=None, alias=None, incremental_strategy=None) %}{% endmacro %}"
+dbt_is_incremental = "{% macro is_incremental() %}True{% endmacro %}"
+dbt_modification_timestamp_expr = "{% macro modification_timestamp_expr() %}CURRENT_TIMESTAMP(){% endmacro %}"
+dbt_get_incremental_watermark = "{% macro get_incremental_watermark(col=None) %}AND _source_modified_at > TIMESTAMP('1900-01-01'){% endmacro %}"
+dbt_audit_columns = "{% macro audit_columns() %}CURRENT_TIMESTAMP() AS _dbt_loaded_at{% endmacro %}"
