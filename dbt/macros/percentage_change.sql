@@ -12,5 +12,6 @@
       2. Reutiliza a macro `safe_divide` para evitar falhas de execução por divisão por zero caso `previous_value` seja 0 ou nulo.
 #}
 {% macro percentage_change(current_value, previous_value) -%}
-    {{ safe_divide(current_value ~ " - " ~ previous_value, previous_value) }}
+    {{ safe_divide("("~ current_value ~ " - " ~ previous_value ~ ")", previous_value) }}
 {%- endmacro %}
+
