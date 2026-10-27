@@ -203,26 +203,20 @@ Em bancos transacionais, uma linha recém-criada frequentemente possui a coluna 
 ## 9. Cálculo de Variação Percentual (Growth / Percentage Change)
 
 ### `percentage_change`
-* **Arquivo:** `macros/percentage_change.sql`
-* **Dependência Externa:** Depende da macro interna `safe_divide`.
-* **Objetivo:** Calcular a taxa relativa de crescimento ou queda percentual entre dois valores ou períodos analíticos ($\frac{V_{\text{atual}} - V_{\text{anterior}}}{V_{\text{anterior}}}$), protegendo o pipeline contra erros de divisão por zero ou denominadores nulos.
+- **Arquivo:** `macros/percentage_change.sql`
+- **Dependência Externa:** Depende da macro interna `safe_divide`.
+- **Objetivo:** Calcular a taxa relativa de crescimento ou queda percentual entre dois valores ou períodos analíticos ($\frac{V_{\text{atual}} - V_{\text{anterior}}}{V_{\text{anterior}}}$), protegendo o pipeline contra erros de divisão por zero ou denominadores nulos.
 
-#### 💡 Decisão de Arquitetura: Por que compor com `safe_divide` e concatenação Jinja?
-O cálculo de taxas de variação temporal (como MoM - *Month over Month* ou YoY - *Year over Year*) é suscetível a exceções matemáticas nos dados de origem:
+#### 💡 Decisão de Arquitetura: Por que compor com `safe_divide` e parênteses explícitos?
+O cálculo de taxas de variação temporal (como MoM - *Month over Month* ou YoY - *Year over Year*) é suscetível a exceções matemáticas e regras de precedência de operadores:
 1. **Proteção Resiliente Contra Falhas:** Em cenários onde uma métrica no período anterior foi zero (ex.: uma nova loja que faturou R$ 0 no mês anterior ou cliente estreante), uma divisão convencional gera erro fatal de execução (*division by zero*). Ao reaproveitar a macro `safe_divide`, a operação retorna `NULL` graciosamente.
-2. **Construção Dinâmica via Operador `~`:** O operador de concatenação do Jinja (`~`) une programaticamente os identificadores das colunas ou expressões (`current_value ~ " - " ~ previous_value`), enviando a expressão matemática de diferença diretamente para o numerador da macro de divisão segura sem custo extra de processamento.
+2. **Precedência Matemática com Parênteses Explícitos:** A concatenação via Jinja envolve a subtração obrigatoriamente entre parênteses: `"(" ~ current_value ~ " - " ~ previous_value ~ ")"`. Isso garante que a diferença seja calculada antes da divisão no BigQuery, prevenindo ambiguidade na ordem dos operadores ao compilar o SQL.
 3. **Padronização da Escala Decimal:** A macro devolve o resultado na base decimal canônica (ex.: `0.15` para 15% ou `-0.05` para -5%), delegando a formatação visual (`15%`) exclusivamente para a camada de apresentação/BI.
 
 #### Assinatura da Macro:
 ```jinja
 {% macro percentage_change(current_value, previous_value) -%}
-    {{ safe_divide(current_value ~ " - " ~ previous_value, previous_value) }}
+    {{ safe_divide("(" ~ current_value ~ " - " ~ previous_value ~ ")", previous_value) }}
 {%- endmacro %}
-```
+
 ---
-
-
-
-
-
-
