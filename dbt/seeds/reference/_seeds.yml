@@ -1,0 +1,72 @@
+version: 2
+
+seeds:
+  - name: seed_regioes_estados
+    description: Tabela de referência dos estados brasileiros e suas respectivas regiões.
+    columns:
+      - name: sigla
+        description: Sigla oficial da unidade federativa.
+        tests: [unique, not_null]
+
+      - name: estado
+        description: Nome do estado brasileiro.
+        tests: [not_null]
+
+      - name: regiao
+        description: Região geográfica brasileira à qual o estado pertence.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"]
+
+      - name: ordem_regiao
+        description: Número utilizado para definir a ordem de exibição das regiões, de 1 a 5.
+        tests: [not_null]
+
+  - name: seed_segmentos_veiculos
+    description: Tabela de referência com faixas de valor utilizadas na classificação dos veículos por segmento.
+    columns:
+      - name: segmento
+        description: Nome do segmento de valor do veículo, como Standard, Premium ou Luxo.
+        tests: [unique, not_null]
+
+      - name: valor_minimo
+        description: Valor mínimo definido para a classificação do veículo no segmento.
+        tests: [not_null]
+
+      - name: valor_maximo
+        description: Valor máximo definido para o segmento. Quando NULL, indica ausência de limite superior.
+
+      - name: ordem_segmento
+        description: Número utilizado para definir a ordem de exibição dos segmentos, de 1 a 3.
+        tests: [unique, not_null]
+
+  - name: seed_tipos_veiculos
+    description: Tabela de referência utilizada para padronizar variações nos nomes dos tipos de veículos.
+    columns:
+      - name: tipo_origem
+        description: Nome original do tipo de veículo, conforme recebido na fonte de dados.
+        tests: [unique, not_null]
+
+      - name: tipo_padronizado
+        description: Nome padronizado utilizado para consolidar variações equivalentes de tipos de veículos.
+        tests: [not_null]
+
+      - name: categoria
+        description: Categoria de classificação do veículo utilizada nas análises de negócio.
+        tests: [not_null]
+
+      - name: ordem_tipo
+        description: Número utilizado para definir a ordem de exibição dos tipos de veículos.
+
+  - name: seed_feriados_nacionais
+    description: Tabela de referência com as datas e os nomes dos feriados nacionais.
+    columns:
+      - name: data
+        description: Data correspondente ao feriado nacional.
+        tests: [unique, not_null]
+
+      - name: nome_feriado
+        description: Nome atribuído ao feriado nacional.
+        tests: [not_null]
