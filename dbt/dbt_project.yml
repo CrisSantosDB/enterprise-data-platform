@@ -65,3 +65,8 @@ seeds:
     +schema: seeds 
     reference:
       +tags: ["reference"]
+      seed_segmentos_veiculos:
+        +column_types:
+          valor_minimo: NUMERIC
+          valor_maximo: NUMERIC
+          ordem_segmento: INT64
