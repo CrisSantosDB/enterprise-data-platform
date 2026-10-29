@@ -1,0 +1,279 @@
+version: 2
+
+models:
+  - name: bronze_estados
+    description: >
+      Tabela incremental de unidades federativas ingerida a partir do dataset RAW no BigQuery.
+      Sem aplicação de regras de negócio.
+    columns:
+      - name: id_estados
+        description: "Identificador único da unidade federativa (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: estado
+        description: "Nome por extenso do estado."
+        data_tests:
+          - not_null
+      - name: sigla
+        description: "Sigla de dois caracteres da unidade federativa (UF)."
+        data_tests:
+          - not_null
+      - name: data_inclusao
+        description: "Timestamp original de inserção do registro na fonte transacional."
+        data_tests:
+          - not_null
+      - name: data_atualizacao
+        description: >
+          Timestamp de atualização na origem. Dado que a fonte opera sob o padrão de delete/insert
+          (sem atualizações in-place), espelha o valor de data_inclusao.
+        data_tests:
+          - not_null
+      - name: _loaded_at
+        description: "Timestamp de auditoria do dbt indicando a data/hora da ingestão incremental na camada Bronze."
+        data_tests:
+          - not_null
+
+  - name: bronze_cidades
+    description: >
+      Tabela incremental de municípios ingerida a partir do dataset RAW no BigQuery.
+    columns:
+      - name: id_cidades
+        description: "Identificador único do município (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: cidade
+        description: "Nome do município."
+        data_tests:
+          - not_null
+      - name: id_estados
+        description: "Chave estrangeira que referencia a unidade federativa correspondente em bronze_estados."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_estados')
+                field: id_estados
+      - name: data_inclusao
+        description: "Timestamp original de inserção do registro na fonte transacional."
+        data_tests:
+          - not_null
+      - name: data_atualizacao
+        description: >
+          Timestamp de atualização na origem. Espelha a data de inclusão da versão mais recente da linha.
+        data_tests:
+          - not_null
+      - name: _loaded_at
+        description: "Timestamp de auditoria do dbt indicando a data/hora da ingestão incremental na camada Bronze."
+        data_tests:
+          - not_null
+
+  - name: bronze_concessionarias
+    description: >
+      Tabela incremental do registro de lojas e pontos de venda concessionados ingerida a partir do dataset RAW.
+    columns:
+      - name: id_concessionarias
+        description: "Identificador único da concessionária (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: concessionaria
+        description: "Nome de fachada ou denominação social da loja concessionária."
+        data_tests:
+          - not_null
+      - name: id_cidades
+        description: "Chave estrangeira que relaciona a localização da concessionária em bronze_cidades."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_cidades')
+                field: id_cidades
+      - name: data_inclusao
+        description: "Timestamp original de inserção do registro na fonte transacional."
+        data_tests:
+          - not_null
+      - name: data_atualizacao
+        description: >
+          Timestamp de atualização na origem. Espelha a data de inclusão da versão mais recente da linha.
+        data_tests:
+          - not_null
+      - name: _loaded_at
+        description: "Timestamp de auditoria do dbt indicando a data/hora da ingestão incremental na camada Bronze."
+        data_tests:
+          - not_null
+
+  - name: bronze_clientes
+    description: >
+      Tabela incremental do cadastro de clientes ingerida a partir do dataset RAW.
+    columns:
+      - name: id_clientes
+        description: "Identificador único do cliente (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: cliente
+        description: "Nome completo do cliente."
+        data_tests:
+          - not_null
+      - name: id_concessionarias
+        description: "Chave estrangeira apontando para a concessionária de registro do cliente em bronze_concessionarias."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_concessionarias')
+                field: id_concessionarias
+      - name: data_inclusao
+        description: "Timestamp original de inserção do registro na fonte transacional."
+        data_tests:
+          - not_null
+      - name: data_atualizacao
+        description: >
+          Timestamp de atualização na origem. Espelha a data de inclusão da versão mais recente da linha.
+        data_tests:
+          - not_null
+      - name: _loaded_at
+        description: "Timestamp de auditoria do dbt indicando a data/hora da ingestão incremental na camada Bronze."
+        data_tests:
+          - not_null
+
+  - name: bronze_vendedores
+    description: >
+      Tabela incremental do corpo comercial e vendedores ingerida a partir do dataset RAW.
+    columns:
+      - name: id_vendedores
+        description: "Identificador único do vendedor (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: nome
+        description: "Nome completo do profissional de vendas."
+        data_tests:
+          - not_null
+      - name: id_concessionarias
+        description: "Chave estrangeira indicando a concessionária de atuação em bronze_concessionarias."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_concessionarias')
+                field: id_concessionarias
+      - name: data_inclusao
+        description: "Timestamp original de inserção do registro na fonte transacional."
+        data_tests:
+          - not_null
+      - name: data_atualizacao
+        description: >
+          Timestamp de atualização na origem. Espelha a data de inclusão da versão mais recente da linha.
+        data_tests:
+          - not_null
+      - name: _loaded_at
+        description: "Timestamp de auditoria do dbt indicando a data/hora da ingestão incremental na camada Bronze."
+        data_tests:
+          - not_null
+
+  - name: bronze_veiculos
+    description: >
+      Catálogo incremental de veículos comercializados ingerido a partir do dataset RAW.
+    columns:
+      - name: id_veiculos
+        description: "Identificador único do veículo (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: nome
+        description: "Modelo comercial do veículo."
+        data_tests:
+          - not_null
+      - name: tipo
+        description: "Classificação ou carroçaria do veículo (ex.: SUV, Sedan, Picape)."
+        data_tests:
+          - not_null
+      - name: valor
+        description: "Preço de tabela sugerido para o veículo."
+        data_tests:
+          - not_null
+          #- positive_value  <-- comentado temporariamente
+      - name: data_inclusao
+        description: "Timestamp original de inserção do registro no catálogo de origem."
+        data_tests:
+          - not_null
+      - name: data_atualizacao
+        description: >
+          Timestamp de atualização na origem. Espelha a data de inclusão da versão mais recente da linha.
+        data_tests:
+          - not_null
+      - name: _loaded_at
+        description: "Timestamp de auditoria do dbt indicando a data/hora da ingestão incremental na camada Bronze."
+        data_tests:
+          - not_null
+
+  - name: bronze_vendas
+    description: >
+      Tabela incremental das transações de vendas de veículos ingerida a partir do dataset RAW.
+    columns:
+      - name: id_vendas
+        description: "Identificador único da transação de venda (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: id_veiculos
+        description: "Chave estrangeira referenciando o veículo comercializado em bronze_veiculos."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_veiculos')
+                field: id_veiculos
+      - name: id_concessionarias
+        description: "Chave estrangeira referenciando a concessionária responsável pela venda em bronze_concessionarias."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_concessionarias')
+                field: id_concessionarias
+      - name: id_vendedores
+        description: "Chave estrangeira referenciando o vendedor que efetuou a venda em bronze_vendedores."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('bronze_vendedores')
+                field: id_vendedores
+      - name: id_clientes
+        description: "Chave estrangeira referenciando o comprador em bronze_clientes."
+        data_tests:
+          - not_null
+          - relationships:
+              config:
+                severity: warn
+                warn_if: "> 0"
+                error_if: "> 10"
+              arguments:
+                to: ref('bronze_clientes')
+                field: id_clientes
+      - name: valor_pago
+        description: "Montante monetário efetivamente liquidado na transação de venda."
+        data_tests:
+          - not_null
+         # - positive_value <-- comentado temporariamente
+      - name: data_venda
+        description: "Data em que a venda foi concretizada."
+        data_tests:
+          - not_null
+      - name: data_inclusao
+        description: "Timestamp original de inserção do registro na fonte transacional."
+        data_tests:
+          - not_null
+      - name: data_atualizacao
+        description: >
+          Timestamp de atualização na origem. Espelha a data de inclusão da versão mais recente da linha.
+        data_tests:
+          - not_null
+      - name: _loaded_at
+        description: "Timestamp de auditoria do dbt indicando a data/hora da ingestão incremental na camada Bronze."
+        data_tests:
+          - not_null

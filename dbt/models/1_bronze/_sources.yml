@@ -1,0 +1,15 @@
+version: 2 
+
+sources:
+  - name : raw
+    database: "{{ target.project }}"
+    schema: RAW
+    description: "Dados transacionais e cadastrais brutos alojados no dataset RAW."
+    tables:
+      - name: cidades
+      - name: estados
+      - name: clientes
+      - name: veiculos 
+      - name: vendas 
+      - name: vendedores
+      - name: concessionarias 
