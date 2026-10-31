@@ -195,7 +195,7 @@ models:
         description: "Preço de tabela sugerido para o veículo."
         data_tests:
           - not_null
-          #- positive_value  <-- comentado temporariamente
+           
       - name: data_inclusao
         description: "Timestamp original de inserção do registro no catálogo de origem."
         data_tests:
@@ -259,7 +259,8 @@ models:
         description: "Montante monetário efetivamente liquidado na transação de venda."
         data_tests:
           - not_null
-         # - positive_value <-- comentado temporariamente
+          
+                  
       - name: data_venda
         description: "Data em que a venda foi concretizada."
         data_tests:
