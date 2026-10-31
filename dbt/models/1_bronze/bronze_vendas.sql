@@ -1,4 +1,4 @@
-{{ config(unique_key="") }}
+{{ config(unique_key="id_vendas") }}
 
 WITH source AS (
     SELECT
