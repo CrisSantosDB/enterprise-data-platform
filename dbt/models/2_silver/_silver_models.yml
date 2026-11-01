@@ -1,0 +1,255 @@
+version: 2
+
+models:
+  - name: silver_estados
+    description: >
+      Estados normalizados e enriquecidos com região (via seed_regioes_estados).
+      Materialização incremental (merge) por id_estados.
+    columns:
+      - name: id_estados
+        description: Identificador exclusivo e chave primária do estado.
+        data_tests: [unique, not_null]
+      - name: sigla
+        description: Sigla da unidade federativa em duas letras ex CE, SP, RJ.
+        data_tests: [not_null]
+      - name: regiao
+        description: Grande região geográfica brasileira associada à unidade federativa (Norte, Nordeste, Sul, Sudeste ou Centro-Oeste).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Norte", "Nordeste", "Sul", "Sudeste", "Centro-Oeste"]
+      - name: data_atualizacao
+        description: Timestamp do último processamento ou modificação do registro do estado.
+        data_tests:
+          - not_null
+          - not_before_column:
+              arguments:
+                compare_column: data_inclusao
+
+  - name: silver_cidades
+    description: Cidades normalizadas, uma linha por id_cidades.
+    columns:
+      - name: id_cidades
+        description: Identificador exclusivo e chave primária da cidade.
+        data_tests: [unique, not_null]
+      - name: cidade
+        description: Nome normalizado do município (sem caracteres especiais/acentos e padronizado em caixa alta).
+        data_tests:
+          - not_null
+      - name: id_estados
+        description: Chave estrangeira que referencia a unidade federativa correspondente em silver_estados.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('silver_estados')
+                field: id_estados
+      - name: data_atualizacao
+        description: Timestamp do último processamento ou modificação do registro da cidade.
+        data_tests:
+          - not_null
+          - not_before_column:
+              arguments:
+                compare_column: data_inclusao
+
+  - name: silver_concessionarias
+    description: Concessionárias normalizadas, uma linha por id_concessionarias.
+    columns:
+      - name: id_concessionarias
+        description: Identificador exclusivo e chave primária da concessionária.
+        data_tests: [unique, not_null]
+
+      - name: concessionaria
+        description: Razão social ou nome fantasia padronizado da concessionária.
+        data_tests:
+          - not_null
+
+      - name: id_cidades
+        description: Chave estrangeira que referencia o município onde a concessionária opera em silver_cidades.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_cidades')
+                field: id_cidades
+
+      - name: data_atualizacao
+        description: Timestamp do último processamento ou modificação do cadastro da concessionária.
+        data_tests:
+          - not_null
+          - not_before_column:
+              arguments:
+                compare_column: data_inclusao
+
+  - name: silver_clientes
+    description: Clientes normalizados, uma linha por id_clientes.
+    columns:
+      - name: id_clientes
+        description: Identificador exclusivo e chave primária do cliente.
+        data_tests: [unique, not_null]
+
+      - name: cliente
+        description: Nome completo padronizado e higienizado do cliente.
+        data_tests:
+          - not_null
+
+      - name: id_concessionarias
+        description: Chave estrangeira que relaciona o cliente à sua concessionária de referência em silver_concessionarias.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_concessionarias')
+                field: id_concessionarias
+
+      - name: endereco
+        description: Endereço residencial ou comercial normalizado do cliente.
+        data_tests:
+          - not_null
+
+      - name: data_atualizacao
+        description: Timestamp do último processamento ou modificação do cadastro do cliente.
+        data_tests:
+          - not_null
+          - not_before_column:
+              arguments:
+                compare_column: data_inclusao
+
+  - name: silver_vendedores
+    description: Vendedores normalizados, uma linha por id_vendedores.
+    columns:
+      - name: id_vendedores
+        description: Identificador exclusivo e chave primária do vendedor.
+        data_tests: [unique, not_null]
+
+      - name: nome
+        description: Nome completo padronizado e higienizado do vendedor.
+        data_tests:
+          - not_null
+
+      - name: id_concessionarias
+        description: Chave estrangeira que relaciona o vendedor à concessionária onde está alocado em silver_concessionarias.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_concessionarias')
+                field: id_concessionarias
+
+      - name: data_atualizacao
+        description: Timestamp do último processamento ou modificação do registro do vendedor.
+        data_tests:
+          - not_null
+          - not_before_column:
+              arguments:
+                compare_column: data_inclusao
+
+  - name: silver_veiculos
+    description: >
+      Veículos normalizados e enriquecidos com tipo padronizado (via
+      seed_tipos_veiculos) e segmento comercial (via seed_segmentos_veiculos,
+      calculado sobre o valor de catálogo).
+    columns:
+      - name: id_veiculos
+        description: Identificador exclusivo e chave primária do veículo.
+        data_tests: [unique, not_null]
+
+      - name: nome
+        description: Modelo ou denominação comercial padronizada do veículo.
+        data_tests: [not_null]
+
+      - name: valor_tabela
+        description: Preço sugerido ou valor oficial de catálogo/tabela do veículo.
+        data_tests:
+          - not_null
+          - positive_value
+
+      - name: tipo
+        description: Categoria ou carroceria do veículo ex SUV, Sedan, Hatchback.
+        data_tests:
+          - not_null
+
+      - name: segmento_veiculo
+        description: Standard/Premium/Luxo. Só é nulo se `valor` for nulo ou negativo.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Standard", "Premium", "Luxo", "Não Informado"]
+
+      - name: data_atualizacao
+        description: Timestamp do último processamento ou modificação das informações do veículo.
+        data_tests:
+          - not_null
+          - not_before_column:
+              arguments:
+                compare_column: data_inclusao
+
+  - name: silver_vendas
+    description: >
+      Vendas normalizadas, uma linha por id_vendas. Grão idêntico ao de
+      bronze_vendas — nenhum enriquecimento de negócio é feito aqui (fica a
+      cargo da Gold).
+    columns:
+      - name: id_vendas
+        description: Identificador exclusivo e chave primária da transação de venda.
+        data_tests: [unique, not_null]
+
+      - name: id_veiculos
+        description: Chave estrangeira que identifica o veículo negociado em silver_veiculos.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_veiculos')
+                field: id_veiculos
+
+      - name: id_concessionarias
+        description: Chave estrangeira que identifica a concessionária onde a venda foi concretizada em silver_concessionarias.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_concessionarias')
+                field: id_concessionarias
+
+      - name: id_vendedores
+        description: Chave estrangeira que identifica o vendedor responsável pela negociação em silver_vendedores.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_vendedores')
+                field: id_vendedores
+
+      - name: id_clientes
+        description: Chave estrangeira que identifica o comprador em silver_clientes (com tolerância a registros órfãos da origem).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('silver_clientes')
+                field: id_clientes
+                config:
+                  severity: warn
+                  warn_if: ">0"
+
+      - name: valor_pago
+        description: Valor monetário final efetivamente pago pelo veículo na negociação.
+        data_tests:
+          - not_null
+          - positive_value
+
+      - name: data_venda
+        description: Data e hora em que a transação de venda foi formalizada.
+        data_tests:
+          - not_null
+          - not_far_future_date:
+              arguments:
+                max_days_ahead: 1
+
+      - name: data_atualizacao
+        description: Timestamp do último processamento ou modificação do registro da transação.
+        data_tests:
+          - not_null
+          - not_before_column:
+              arguments:
+                compare_column: data_inclusao
