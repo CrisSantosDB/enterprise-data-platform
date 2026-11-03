@@ -84,7 +84,7 @@ enriquecido_segmentos AS (
         e.data_atualizacao,
         e.data_inclusao,
         e._source_modifiel_at,
-        coalesce(s.segmento, 'Não Informado') AS segmento_veiculo,
+        coalesce(s.segmento, 'Nao Informado') AS segmento_veiculo,
         coalesce(s.ordem_segmento, 0) AS ordem_segmento
 
     FROM enriquecido_tipos AS e
