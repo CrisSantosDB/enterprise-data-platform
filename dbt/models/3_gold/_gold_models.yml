@@ -1,0 +1,216 @@
+version: 2
+
+models:
+  - name: dim_clientes
+    description: "Dimensão da tabela clientes"
+    columns:
+      - name: sk_clientes
+        description: "Chave substituta (surrogate key) da dimensão cliente."
+        data_tests: [unique, not_null]
+
+      - name: id_clientes
+        description: "Identificador de negócio original (natural key) do cliente."
+        data_tests: [unique, not_null]
+
+      - name: cliente
+        description: "Nome completo da pessoa física ou razão social do cliente."
+        data_tests: [not_null]
+
+      - name: endereco
+        description: "Endereço cadastral informado do cliente."
+        data_tests: [not_null]
+
+  - name: dim_veiculos
+    description: "Dimensão da tabela veiculos"
+    columns:
+      - name: sk_veiculos
+        description: "Chave substituta (surrogate key) da dimensão veículo."
+        data_tests: [unique, not_null]
+
+      - name: id_veiculos
+        description: "Identificador de negócio original (natural key) do veículo."
+        data_tests: [not_null]
+
+      - name: nome
+        description: "Nome do modelo comercial do veículo."
+        data_tests: [not_null]
+
+      - name: tipo
+        description: "Tipo de carroceria ou classificação de uso do veículo (ex: SUV, Sedan, Hatch)."
+        data_tests: [not_null]
+
+      - name: categoria_veiculo
+        description: "Categoria operacional ou porte do veículo."
+        data_tests: [not_null]
+
+      - name: segmento_veiculo
+        description: "Segmento de mercado e posicionamento comercial do veículo."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Standard", "Premium", "Luxo", "Nao Informado"]
+
+  - name: dim_vendedores
+    description: "Dimensão da tabela silver_vendedores"
+    columns:
+      - name: sk_vendedores
+        description: "Chave substituta (surrogate key) da dimensão vendedor."
+        data_tests: [unique, not_null]
+
+      - name: id_vendedores
+        description: "Identificador de negócio original (natural key) do vendedor."
+        data_tests: [not_null]
+
+      - name: nome
+        description: "Nome completo do vendedor responsável."
+        data_tests: [not_null]
+
+  - name: dim_concessionarias
+    description: "Dimensão de concessionárias consolidada"
+    columns:
+      - name: sk_concessionarias
+        description: "Chave substituta (surrogate key) da dimensão concessionária."
+        data_tests: [unique, not_null]
+
+      - name: id_concessionarias
+        description: "Identificador de negócio original (natural key) da concessionária."
+        data_tests: [not_null]
+
+      - name: concessionaria
+        description: "Nome fantasia ou razão social da concessionária."
+        data_tests: [not_null]
+
+      - name: cidade
+        description: "Nome do município onde a concessionária está localizada."
+        data_tests: [not_null]
+
+      - name: estado
+        description: "Nome por extenso do estado de localização da concessionária."
+        data_tests: [not_null]
+
+      - name: sigla
+        description: "Sigla da unidade federativa (UF) da concessionária."
+        data_tests: [not_null]
+
+      - name: regiao
+        description: "Região geográfica brasileira da concessionária (ex: Nordeste, Sudeste)."
+        data_tests: [not_null]
+
+  - name: dim_data
+    description: "Dimensão de calendário para análises temporais e suporte a regras bancárias/comerciais."
+    columns:
+      - name: sk_data
+        description: "Surrogate key numérica no padrão YYYYMMDD."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: dt_data
+        description: "Data nativa no formato DATE."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: ano
+        description: "Ano civil com 4 dígitos (ex: 2026)."
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 2020
+                max_value: 2031
+
+      - name: semestre
+        description: "Semestre do ano (1 para primeiro semestre, 2 para segundo semestre)."
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 2
+
+      - name: trimestre
+        description: "Trimestre do ano (1 a 4)."
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 4
+
+      - name: mes
+        description: "Número do mês no ano (1 a 12)."
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 12
+
+      - name: dia_mes
+        description: "Dia do mês corrente (1 a 31)."
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 31
+
+      - name: dia_semana_numero
+        description: "Número correspondente ao dia da semana (1 para Domingo até 7 para Sábado)."
+        data_tests:
+          - not_null
+          - accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 7
+
+      - name: nome_mes_pt
+        description: "Nome por extenso do mês em língua portuguesa."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "Janeiro"
+                  - "Fevereiro"
+                  - "Março"
+                  - "Abril"
+                  - "Maio"
+                  - "Junho"
+                  - "Julho"
+                  - "Agosto"
+                  - "Setembro"
+                  - "Outubro"
+                  - "Novembro"
+                  - "Dezembro"
+
+      - name: nome_dia_semana_pt
+        description: "Nome por extenso do dia da semana em língua portuguesa."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "Domingo"
+                  - "Segunda-feira"
+                  - "Terça-feira"
+                  - "Quarta-feira"
+                  - "Quinta-feira"
+                  - "Sexta-feira"
+                  - "Sábado"
+
+      - name: eh_fim_de_semana
+        description: "Indicador booleano (TRUE/FALSE) que identifica se a data cai em sábado ou domingo."
+        data_tests:
+          - not_null
+
+      - name: eh_dia_util
+        description: "Indicador booleano (TRUE/FALSE) que identifica se o dia é produtivo/útil comum."
+        data_tests:
+          - not_null
+
+      - name: eh_dia_util_bancario
+        description: "Indicador booleano (TRUE/FALSE) que sinaliza funcionamento de compensação bancária (exclui finais de semana e feriados nacionais)."
+        data_tests:
+          - not_null
