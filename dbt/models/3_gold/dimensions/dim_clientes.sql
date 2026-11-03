@@ -14,7 +14,7 @@ WITH source AS (
 registro_desconhecido AS (
     SELECT
         '-1' AS sk_clientes,
-        1 AS id_clientes,
+        -1 AS id_clientes,
         'Nao Informado' AS cliente,
         'Nao Informado' AS endereco,
         {{ audit_columns() }}

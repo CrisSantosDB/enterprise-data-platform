@@ -117,7 +117,7 @@ models:
           - not_null
           - accepted_range:
               arguments:
-                min_value: 2020
+                min_value: 1900
                 max_value: 2031
 
       - name: semestre
@@ -184,6 +184,7 @@ models:
                   - "Outubro"
                   - "Novembro"
                   - "Dezembro"
+                  - "Nao Informado"
 
       - name: nome_dia_semana_pt
         description: "Nome por extenso do dia da semana em língua portuguesa."
@@ -199,6 +200,7 @@ models:
                   - "Quinta-feira"
                   - "Sexta-feira"
                   - "Sábado"
+                  - "Nao Informado"
 
       - name: eh_fim_de_semana
         description: "Indicador booleano (TRUE/FALSE) que identifica se a data cai em sábado ou domingo."
@@ -214,3 +216,102 @@ models:
         description: "Indicador booleano (TRUE/FALSE) que sinaliza funcionamento de compensação bancária (exclui finais de semana e feriados nacionais)."
         data_tests:
           - not_null
+      
+  - name: fato_vendas
+    description: >
+      Tabela fato transacional de vendas de veículos da camada Gold, modelada no grão de uma linha por transação de venda (`id_vendas`).
+      Contém métricas financeiras aditivas (valor pago, valor de tabela e percentual de desconto) e relaciona-se via chaves substitutas (`sk_*`) 
+      com as dimensões de clientes, vendedores, concessionárias, veículos e calendário (`dim_data`) para suporte a análises gerenciais e de faturamento.
+    columns:
+      - name: id_vendas
+        description: "Chave primária natural da transação de venda na origem."
+        data_tests: [unique, not_null]
+      
+      - name: sk_vendedores
+        description: "Chave substituta que referencia a dim_vendedores. Recebe '-1' caso o vendedor seja nulo ou órfão."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_vendedores')
+                field: sk_vendedores
+     
+      - name: sk_concessionarias
+        description: "Chave substituta que referencia a dim_concessionarias. Recebe '-1' caso seja nula ou órfã."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_concessionarias')
+                field: sk_concessionarias
+
+      - name: sk_clientes
+        description: "Chave substituta que referencia a dim_clientes. Recebe '-1' caso o cliente seja nulo ou órfão."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_clientes')
+                field: sk_clientes
+      
+      - name: sk_veiculos
+        description: "Chave substituta que referencia a dim_veiculos. Recebe '-1' caso o veículo seja nulo ou órfão."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_veiculos')
+                field: sk_veiculos
+
+      - name: sk_data
+        description: "Chave substituta numérica no formato YYYYMMDD que referencia a dim_data. Recebe -1 quando ausente."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_data')
+                field: sk_data
+      
+      - name: data_venda
+        description: "Data civil da conclusão da transação de venda."
+
+      - name: quantidade_vendas
+        description: "Métrica unitária de contagem de transações (sempre 1 por registo)."
+        data_tests:
+          - not_null
+
+      - name: valor_tabela
+        description: "Preço de tabela de referência do veículo na época da transação."
+        data_tests:
+          - not_null
+
+      - name: valor_pago
+        description: "Valor financeiro líquido efetivamente pago pelo cliente na venda."
+        data_tests:
+          - not_null
+          - positive_value
+      
+      - name: valor_desconto
+        description: "Valor monetário do desconto concedido (valor_tabela subtraído de valor_pago)."
+        data_tests:
+          - not_null
+
+      - name: flag_desconto
+        description: "Indicador binário de aplicação de desconto (1 quando valor_desconto > 0, caso contrário 0)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
+
+      - name: percentual_desconto
+        description: "Percentual de desconto calculado em relação ao valor de tabela, arredondado a 3 casas decimais."
+        data_tests:
+          - accepted_range:
+              arguments:
+                min_value: "{{ var('percentual_desconto_min') }}"
+                max_value: "{{ var('percentual_desconto_max') }}"
+
+      - name: data_inclusao
+        description: "Timestamp de auditoria da inserção do registo na camada de origem."
