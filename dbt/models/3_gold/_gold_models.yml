@@ -382,3 +382,67 @@ models:
         description: "Posição ordinal no ranking mensal de faturamento (DENSE_RANK)."
         data_tests:
           - not_null
+
+  - name: mart_comparacao_concessionarias
+    description: "Comparação de desempenho e ranking de concessionárias em nível global e regional."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - ano_mes
+            - id_concessionarias
+
+    columns:
+      - name: ano_mes
+        description: "Ano e mês de apuração (formato YYYY-MM)."
+        data_tests:
+          - not_null
+
+      - name: id_concessionarias
+        description: "Chave natural da concessionária."
+        data_tests:
+          - not_null
+
+      - name: concessionaria
+        description: "Nome da unidade ou filial."
+        data_tests:
+          - not_null
+
+      - name: cidade
+        description: "Cidade da concessionária."
+        data_tests:
+          - not_null
+
+      - name: estado
+        description: "UF da concessionária."
+        data_tests:
+          - not_null
+
+      - name: regiao
+        description: "Região geográfica da concessionária."
+        data_tests:
+          - not_null
+
+      - name: quantidade_vendas
+        description: "Volume total de veículos vendidos na competência."
+        data_tests:
+          - not_null
+
+      - name: receita
+        description: "Faturamento bruto total apurado no período."
+        data_tests:
+          - not_null
+
+      - name: ticket_medio
+        description: "Valor médio faturado por venda (receita / quantidade_vendas)."
+        data_tests:
+          - not_null
+
+      - name: posicao_nacional
+        description: "Posição ordinal no ranking geral da rede (DENSE_RANK)."
+        data_tests:
+          - not_null
+
+      - name: posicao_regional
+        description: "Posição ordinal no ranking restrito à região geográfica."
+        data_tests:
+          - not_null
