@@ -36,7 +36,7 @@ WITH source AS (
 
     {% if is_incremental() %}
     WHERE
-        v.data_inclusao > (
+        v.data_inclusao >= (
             SELECT MAX(destino.data_inclusao)
             FROM {{ this }} AS destino
         )
