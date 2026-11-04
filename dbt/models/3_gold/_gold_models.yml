@@ -483,3 +483,31 @@ models:
         data_tests:
           - not_null
           - positive_value
+
+  - name: audit_vendas_sem_clientes
+    description: "Auditoria de integridade referencial: transações de vendas cujo id_clientes não foi encontrado no cadastro silver_clientes."
+    data_tests:
+      - must_be_empty:
+          config:
+            severity: warn
+
+  - name: audit_vendas_sem_concessionarias
+    description: "Auditoria de integridade referencial: transações de vendas cujo id_concessionarias não foi encontrado em silver_concessionarias."
+    data_tests:
+      - must_be_empty:
+          config:
+            severity: warn
+
+  - name: audit_vendas_sem_veiculos
+    description: "Auditoria de integridade referencial: transações de vendas cujo id_veiculos não foi encontrado no catálogo silver_veiculos."
+    data_tests:
+      - must_be_empty:
+          config:
+            severity: warn
+
+  - name: audit_vendas_sem_vendedor
+    description: "Auditoria de integridade referencial: transações de vendas cujo id_vendedores não foi encontrado em silver_vendedores."
+    data_tests:
+      - must_be_empty:
+          config:
+            severity: warn
