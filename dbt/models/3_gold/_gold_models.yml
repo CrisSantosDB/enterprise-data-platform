@@ -446,3 +446,40 @@ models:
         description: "Posição ordinal no ranking restrito à região geográfica."
         data_tests:
           - not_null
+
+  - name: mart_visao_geral_mes
+    description: "Visão consolidada mensal da operação comercial com receita líquida, receita bruta e evolução MoM."
+    columns:
+      - name: ano_mes
+        description: "Ano e mês de competência (grão da tabela no formato YYYY-MM)."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: quantidade_vendas_mes
+        description: "Volume total de veículos faturados no mês."
+        data_tests:
+          - not_null
+
+      - name: receita_liquida
+        description: "Faturamento líquido total faturado no mês."
+        data_tests:
+          - not_null
+          - positive_value
+
+      - name: desconto_total
+        description: "Montante financeiro concedido em descontos no período."
+        data_tests:
+          - not_null
+
+      - name: receita_bruta
+        description: "Faturamento bruto total (receita líquida + descontos)."
+        data_tests:
+          - not_null
+          - positive_value
+
+      - name: ticket_medio
+        description: "Valor médio faturado por veículo vendido no mês."
+        data_tests:
+          - not_null
+          - positive_value
