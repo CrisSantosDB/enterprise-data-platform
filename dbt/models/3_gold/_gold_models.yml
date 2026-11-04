@@ -315,3 +315,70 @@ models:
 
       - name: data_inclusao
         description: "Timestamp de auditoria da inserção do registo na camada de origem."
+
+  
+
+  - name: mart_vendas_por_vendedores
+    description: "Painel consolidado de ranking de performance de vendas mensal por vendedor."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - ano_mes
+            - id_vendedores
+            - concessionaria
+
+    columns:
+      - name: ano_mes
+        description: "Ano e mês da apuração (formato YYYY-MM)."
+        data_tests:
+          - not_null
+
+      - name: id_vendedores
+        description: "Chave natural do vendedor."
+        data_tests:
+          - not_null
+
+      - name: vendedor
+        description: "Nome do vendedor."
+        data_tests:
+          - not_null
+
+      - name: concessionaria
+        description: "Nome da concessionária onde as vendas foram realizadas."
+        data_tests:
+          - not_null
+
+      - name: cidade
+        description: "Cidade da concessionária."
+        data_tests:
+          - not_null
+
+      - name: estado
+        description: "UF da concessionária."
+        data_tests:
+          - not_null
+
+      - name: regiao
+        description: "Região geográfica da concessionária."
+        data_tests:
+          - not_null
+
+      - name: quantidade_vendas
+        description: "Volume total de vendas concretizadas no período."
+        data_tests:
+          - not_null
+
+      - name: receita
+        description: "Faturamento bruto total no período."
+        data_tests:
+          - not_null
+
+      - name: ticket_medio
+        description: "Valor médio faturado por venda (receita / quantidade_vendas)."
+        data_tests:
+          - not_null
+
+      - name: posicao_vendedores
+        description: "Posição ordinal no ranking mensal de faturamento (DENSE_RANK)."
+        data_tests:
+          - not_null
