@@ -31,3 +31,7 @@ tira_acentos = "{% macro tira_acentos(field) %}UPPER({{ field }}){% endmacro %}"
 safe_trim = "{% macro safe_trim(field) %}TRIM({{ field }}){% endmacro %}"
 normalize_text = "{% macro normalize_text(field) %}TRIM({{ field }}){% endmacro %}"
 normalize_upper = "{% macro normalize_upper(field) %}UPPER({{ normalize_text(field) }}){% endmacro %}"
+date_spine = "{% macro date_spine(datepart, start_date, end_date) %} SELECT CAST('2026-01-01' AS DATETIME) AS date_day {% endmacro %}"
+generate_surrogate_key = "{% macro generate_surrogate_key(field) %} 'mocked_surrogate_key' {% endmacro %}"
+safe_divide = {% macro safe_divide(numerator, denominator) -%}SAFE_DIVIDE({{numerator}},{{denominator}}){%endmacro%}
+percentage_change = {% macro percentage_change(current_value, previous_value) %} ({{ current_value }} - {{ previous_value }}) / NULLIF({{ previous_value }}, 0) {% endmacro %}
