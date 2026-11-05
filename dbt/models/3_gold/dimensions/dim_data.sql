@@ -23,19 +23,15 @@ enriquecido AS (
 
 source AS (
     SELECT
-        
 
         cast(format_date('%Y%m%d', date(date_day)) AS int64) AS sk_data,
         date(date_day) AS dt_data,
 
-       
         extract(YEAR FROM date_day) AS ano,
         CASE WHEN extract(MONTH FROM date_day) <= 6 THEN 1 ELSE 2 END AS semestre,
 
-        
         extract(QUARTER FROM date_day) AS trimestre,
 
-        
         extract(MONTH FROM date_day) AS mes,
         format_date('%Y-%m', date_day) AS ano_mes,
         CASE extract(MONTH FROM date_day)
@@ -45,17 +41,15 @@ source AS (
             WHEN 10 THEN 'Outubro' WHEN 11 THEN 'Novembro' WHEN 12 THEN 'Dezembro'
         END AS nome_mes_pt,
 
-        
         extract(ISOWEEK FROM date_day) AS semana_ano,
         extract(DAY FROM date_day) AS dia_mes,
-        extract(DAYOFWEEK FROM date_day) AS dia_semana_numero, 
+        extract(DAYOFWEEK FROM date_day) AS dia_semana_numero,
         CASE extract(DAYOFWEEK FROM date_day)
             WHEN 1 THEN 'Domingo' WHEN 2 THEN 'Segunda-feira' WHEN 3 THEN 'Terça-feira'
             WHEN 4 THEN 'Quarta-feira' WHEN 5 THEN 'Quinta-feira' WHEN 6 THEN 'Sexta-feira'
             WHEN 7 THEN 'Sábado'
         END AS nome_dia_semana_pt,
 
-        
         coalesce(extract(DAYOFWEEK FROM date_day) IN (1, 7), FALSE)
             AS eh_fim_de_semana,
         NOT coalesce(extract(DAYOFWEEK FROM date_day) IN (1, 7), FALSE) AS eh_dia_util,
@@ -64,7 +58,6 @@ source AS (
             extract(DAYOFWEEK FROM date_day) IN (1, 7) OR _feriado_data IS NOT NULL, FALSE
         ) AS eh_dia_util_bancario,
 
-        
         {{ audit_columns() }}
 
     FROM enriquecido

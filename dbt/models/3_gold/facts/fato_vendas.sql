@@ -4,6 +4,7 @@ WITH source AS (
     SELECT
         v.id_vendas,
         v.data_inclusao,
+        1 AS quantidade_vendas,
         DATE(v.data_venda) AS data_venda,
         COALESCE(dv.sk_vendedores, '-1') AS sk_vendedores,
         COALESCE(dc.sk_concessionarias, '-1') AS sk_concessionarias,
@@ -11,8 +12,7 @@ WITH source AS (
         COALESCE(dve.sk_veiculos, '-1') AS sk_veiculos,
         COALESCE(dd.sk_data, -1) AS sk_data,
         COALESCE(ve.valor_tabela, 0.0) AS valor_tabela,
-        COALESCE(v.valor_pago, 0.0) AS valor_pago,
-        1 AS quantidade_vendas
+        COALESCE(v.valor_pago, 0.0) AS valor_pago
 
     FROM {{ ref('silver_vendas') }} AS v
 

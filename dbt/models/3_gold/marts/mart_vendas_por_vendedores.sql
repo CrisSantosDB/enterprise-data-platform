@@ -80,4 +80,3 @@ SELECT
     receita_mes_anterior,
     {{ audit_columns() }}
 FROM rank_vendedores
-
