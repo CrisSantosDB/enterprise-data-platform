@@ -114,12 +114,9 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Install dbt dependencies
-        working-directory: dbt
-        run: uv run dbt deps
+        run: uv run dbt deps --project-dir dbt --profiles-dir dbt
 
       - name: Run dbt Compile in DEV
-        working-directory: dbt
         env:
           GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-        run: |
-          uv run dbt compile --target dev   
+        run: uv run dbt compile --target dev --project-dir dbt --profiles-dir dbt
