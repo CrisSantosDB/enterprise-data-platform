@@ -388,9 +388,10 @@ models:
     description: "Comparação de desempenho e ranking de concessionárias em nível global e regional."
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - ano_mes
-            - id_concessionarias
+          arguments:
+            combination_of_columns:
+              - ano_mes
+              - id_concessionarias
 
     columns:
       - name: ano_mes
