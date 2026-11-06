@@ -173,7 +173,7 @@ models:
         data_tests:
           - accepted_values:
               arguments:
-                values: ["Standard", "Premium", "Luxo", "Não Informado"]
+                values: ["Standard", "Premium", "Luxo", "Nao Informado"]
 
       - name: data_atualizacao
         description: Timestamp do último processamento ou modificação das informações do veículo.
