@@ -8,7 +8,7 @@ Esta documentação detalha a arquitetura planejada para a plataforma de dados, 
 
 O diagrama abaixo ilustra as etapas de Origem, Processamento, Armazenamento e Transformação:
 
-![Diagrama da Arquitetura](desenho_arquitetura.jpg)
+![Diagrama da Arquitetura](../assets/desenho_arquitetura.jpg)
 
 ---
 

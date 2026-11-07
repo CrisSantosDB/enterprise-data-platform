@@ -3,182 +3,60 @@
 
 Plataforma de Engenharia de Dados para pequenas e médias empresas, com foco em baixo custo operacional, automação, qualidade dos dados e apoio à tomada de decisões.
 
-## Objetivo do projeto
+## 🏗️ Visão Geral da Arquitetura
 
-Desenvolver uma plataforma moderna de Engenharia de Dados que permita transformar dados operacionais em informações confiáveis para o negócio, priorizando ferramentas open source e serviços em nuvem com opções gratuitas.
+O diagrama abaixo ilustra o fluxo completo da plataforma, desde a ingestão dos dados brutos até a entrega analítica no BigQuery, integrando validações automáticas de código e isolamento de ambientes:
 
-O projeto busca demonstrar como pequenas e médias empresas podem estruturar seus dados sem precisar investir inicialmente em uma infraestrutura complexa ou cara, permitindo a evolução da solução conforme suas necessidades cresçam.
+![Diagrama da Arquitetura](docs/assets/diagrama_arquitetura.png)
 
-## Problema de negócio
+### 🔄 Fluxo Operacional da Plataforma
 
-A Diretoria Comercial precisa acompanhar o desempenho dos vendedores e das concessionárias, analisar descontos e faturamento e avaliar a evolução mensal dos resultados.
+1. **Ingestão e Carregamento (EL):**
+   * **Origem:** Banco operacional relacional (PostgreSQL).
+   * **Execução:** Pipeline local em Python e PySpark via ambiente VS Code.
+   * **Destino:** Carga direta nos datasets brutos (`RAW`) do Google BigQuery nos ambientes de Desenvolvimento (`DEV`) e Produção (`PROD`).
 
-Para atender a essas necessidades, a plataforma organizará os dados em modelos analíticos que permitam comparar resultados, identificar oportunidades de melhoria e apoiar decisões comerciais.
+2. **Integração Contínua (CI):**
+   * **Gatilho:** Abertura de Pull Requests a partir de branches de funcionalidade (`FEATURE/*`).
+   * **Validação:** O GitHub Actions executa linters (`SQLFluff`, `Black`, `Flake8`), checagens estáticas e compilação de código validando contra o ambiente `DEV` no Google Cloud.
 
-## Arquitetura de dados
+3. **Deploy Contínuo e Transformação (CD / dbt Cloud):**
+   * **Gatilho:** Merge de código aprovado na branch `main`.
+   * **Orquestração:** O dbt Cloud executa o job de produção agendado (`dbt build`), processando e testando as camadas Medallion dentro do BigQuery `PROD`.
 
-A plataforma seguirá a arquitetura Medallion, organizada em três camadas:
+---
 
-### Bronze — Dados recebidos
+### O Cenário e o Desafio da Nuvem
+Muitas pequenas e médias empresas evitam a migração para a nuvem por receio de faturas imprevisíveis. No entanto, a nuvem não precisa ser onerosa: o verdadeiro diferencial de qualquer iniciativa analítica reside na governança e no consumo consciente de recursos (**FinOps**). Sem planejamento arquitetural, mesmo empresas com altos orçamentos enfrentam desperdícios; já com decisões inteligentes, é viável extrair valor analítico imediato sem comprometer o fluxo de caixa.
 
-Responsável por armazenar os dados provenientes das fontes de origem, preservando as informações recebidas e facilitando a rastreabilidade.
+O objetivo deste projeto foi projetar e implementar uma plataforma moderna de dados ponta a ponta com **custo inicial zero**, provando que é possível manter governança, desacoplamento e escalabilidade aproveitando estrategicamente serviços open source e camadas gratuitas consolidadas (**Free Tier**).
 
-### Silver — Dados tratados
+---
 
-Responsável pela limpeza, padronização e aplicação de regras de qualidade, preparando os dados para utilização analítica.
+### Decisões de Arquitetura & Otimização de Custos
+A plataforma foi desenhada equilibrando processamento local e serviços em nuvem gerenciados:
 
-### Gold — Dados analíticos
+* **Ingestão Otimizada (EL):** Extração de dados da origem remota e processamento de ingestão executado localmente via Python e PySpark, eliminando o custo recorrente de clusters de computação ligados na nuvem.
+* **Armazenamento e Data Warehouse (GCP BigQuery):**
+  * **Armazenamento:** Uso da cota do [GCP Free Tier](https://cloud.google.com/bigquery/pricing#storage) com até **10 GB de armazenamento ativo gratuito**, volume suficiente para centralizar dados brutos, históricos e tabelas analíticas.
+  * **Processamento sob Demanda:** Consumo dentro da franquia de **1 TiB gratuito mensal de processamento de queries**, ideal para suportar transformações diárias no dbt, testes automatizados e atualização de relatórios no Power BI.
+* **Transformação (dbt Cloud):** Adoção do plano gratuito (*Developer* — 1 utilizador), garantindo agendamento de jobs (`dbt build`), governança e documentação sem custos de licença, viabilizando validar o ROI da ferramenta antes de expandir o time.
 
-Responsável pela modelagem dimensional, com tabelas fato e dimensões que servirão de base para os Data Marts da Diretoria Comercial.
+---
 
-## Qualidade dos dados
+### Impacto e Resultados Técnicos
+A entrega consolidou uma plataforma analítica robusta, auditável e pronta para produção com **custo operacional de infraestrutura rigorosamente zerado**. 
 
-Todas as três camadas terão testes automatizados com dbt.
+<details>
+  <summary>🔍 <b>Clique aqui para visualizar a comprovação de faturamento ($0.00) no GCP Console</b></summary>
+  <br>
+  
+  ![Comprovativo de Custo Zero no GCP](docs/assets/custo_gcp.png)
+</details>
 
-Os testes serão definidos de acordo com as necessidades de cada camada, incluindo:
+A solução assegura:
+* Segregação estrita entre ambientes de desenvolvimento e produção.
+* Automação de qualidade e governança via esteira de CI/CD (GitHub Actions + linters).
+* Testes nativos de integridade e dados modelados em *Star Schema* prontos para consumo de BI.
 
-- Verificação de valores nulos.
-- Verificação de unicidade.
-- Validação de relacionamentos entre dados.
-- Verificação de regras de negócio.
-- Validação da consistência dos dados utilizados nas análises.
-
-Os testes serão executados no fluxo de transformação para identificar problemas de qualidade antes que afetem os resultados analíticos.
-
-## Data Marts da Diretoria Comercial
-
-A Camada Gold será organizada em três Data Marts, cada um voltado a uma necessidade analítica.
-
-### 1. Performance dos vendedores
-
-**Modelo:** `mart_performance_vendedores`
-
-Objetivo: acompanhar o desempenho individual dos vendedores e apoiar a avaliação dos resultados comerciais.
-
-Principais indicadores:
-
-- Quantidade de negócios fechados por vendedor.
-- Faturamento bruto e receita líquida.
-- Ticket médio por profissional.
-- Ranking de desempenho por período e unidade.
-- Indicadores para acompanhamento de metas e comissões.
-
-### 2. Benchmarking das concessionárias
-
-**Modelo:** `mart_benchmarking_concessionarias`
-
-Objetivo: comparar o desempenho das unidades e identificar diferenças regionais e oportunidades de melhoria.
-
-Principais indicadores:
-
-- Faturamento por concessionária, estado e macrorregião.
-- Desconto médio concedido por unidade.
-- Distribuição das vendas por categoria de veículo.
-- Comparação do desempenho comercial entre concessionárias.
-
-### 3. Visão geral mensal
-
-**Modelo:** `mart_visao_geral_mes`
-
-Objetivo: disponibilizar uma visão executiva dos resultados mensais da rede.
-
-Principais indicadores:
-
-- Receita líquida mensal.
-- Quantidade de veículos negociados por mês.
-- Crescimento da receita em relação ao mês anterior (MoM).
-- Percentual médio de desconto da rede.
-
-## Tecnologias
-
-- **Python:** desenvolvimento dos processos de ingestão.
-- **Apache Spark:** processamento de dados.
-- **PostgreSQL:** fonte de dados transacionais.
-- **Google Cloud Platform (GCP):** infraestrutura em nuvem.
-- **BigQuery:** armazenamento e consulta de dados analíticos.
-- **dbt:** transformação, modelagem e testes automatizados de dados.
-- **GitHub Actions:** automação de tarefas, testes e pipelines de CI/CD.
-
-## Configuração do ambiente Python com uv
-
-O projeto utiliza **Python 3.12.13** e **uv** para gerenciar o ambiente virtual e as dependências.
-
-### Pré-requisitos
-
-- Python 3.12
-- [uv](https://docs.astral.sh/uv/)
-
-### Instalação
-
-Após clonar o repositório, acesse a pasta do projeto e execute:
-
-```bash
-uv sync
-```
-
-Esse comando cria ou atualiza o ambiente virtual e instala as dependências definidas no projeto, utilizando o arquivo `uv.lock` quando disponível.
-
-Para ativar o ambiente virtual no Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-Para verificar a versão do Python:
-
-```bash
-uv run python --version
-```
-
-### Gerenciamento de dependências
-
-As dependências principais incluem PySpark, Delta Lake, BigQuery e IPython Kernel. As ferramentas de desenvolvimento e testes incluem Black, Flake8, isort, pytest, pytest-cov e SQLFluff.
-
-As dependências são declaradas no `pyproject.toml` e suas versões resolvidas são registradas no `uv.lock`.
-
-### Arquivos de configuração
-
-- `pyproject.toml`: contém as informações do projeto e as dependências.
-- `uv.lock`: registra as versões resolvidas das dependências para ajudar a reproduzir o ambiente.
-- `.python-version`: indica a versão do Python utilizada pelo projeto.
-
-
-## Ambientes
-
-A plataforma será organizada em dois ambientes:
-
-- **DEV:** desenvolvimento, experimentação e validação das alterações.
-- **PROD:** execução dos processos e disponibilização dos dados de produção.
-
-A separação dos ambientes busca reduzir riscos de alterações indevidas e facilitar a validação antes da publicação das mudanças.
-
-## Automação e CI/CD
-
-O projeto utilizará GitHub Actions para automatizar etapas do ciclo de desenvolvimento, incluindo testes e execução de pipelines.
-
-A integração com o dbt Cloud para disparo do job de produção será configurada conforme a arquitetura e os recursos disponíveis no projeto.
-
-## Estratégia de custos
-
-O projeto prioriza a construção de uma plataforma economicamente viável para pequenas e médias empresas.
-
-Princípios adotados:
-
-- Priorizar ferramentas open source e alternativas gratuitas quando adequadas.
-- Utilizar recursos em nuvem de forma consciente.
-- Evitar serviços ativos e recursos computacionais desnecessários.
-- Avaliar limites gratuitos, cotas e possíveis cobranças antes de habilitar serviços.
-- Considerar os custos de armazenamento, processamento e consultas.
-- Permitir a evolução da arquitetura conforme o volume de dados e as necessidades do negócio aumentem.
-
-Os serviços em nuvem podem possuir limites, condições e cobranças específicas. Por isso, o uso de recursos gratuitos será avaliado conforme as condições vigentes de cada serviço, sem pressupor que toda a infraestrutura será gratuita em qualquer escala.
-
-## Desenvolvimento
-
-O projeto será desenvolvido de forma incremental, com código versionado no GitHub e alterações integradas por meio de Pull Requests.
-
-As implementações serão acompanhadas de testes e documentação conforme a evolução da plataforma.
-
-## Status do projeto
-
-Em desenvolvimento.
+O projeto atua como um padrão de referência replicável para operações que demandam modernização analítica com máxima disciplina financeira.
