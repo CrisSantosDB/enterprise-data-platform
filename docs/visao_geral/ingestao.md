@@ -30,8 +30,8 @@ O script aceita o parâmetro CLI `--ambiente` para chavear as configurações:
 
 | Ambiente | Descrição | Dataset BigQuery |
 |---|---|---|
-| `dev` | Ambiente de desenvolvimento local e testes | `novadrive_raw_dev` |
-| `prod` | Ambiente produtivo | `novadrive_raw_prod` |
+| `dev` | Ambiente de desenvolvimento local e testes | `novadrive-analytics-dev` |
+| `prod` | Ambiente produtivo | `novadrive-analytics-prod` |
 
 As credenciais do banco de origem são injetadas via variáveis de ambiente (`.env`):
 * `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
